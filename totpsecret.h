@@ -15,14 +15,16 @@ private:
     int secondsPeriod;
     int timeShift;
     QString secret_name;
+    QString display_name;
     OTPCard::HashAlgorithm method;
 public:
-    TOTPSecret(int id, const QString& secret_name, OTPCard::HashAlgorithm method);
-    TOTPSecret(int id, const QString& secret_name, OTPCard::HashAlgorithm method, int digits, int secondsPeriod, int timeShift);
+    TOTPSecret(int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method);
+    TOTPSecret(int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method, int digits, int secondsPeriod, int timeShift);
     QPair<QByteArray, int> generateChallenge() const;
     QString TOTP(QByteArray HMAC) const;
     int getId() const {return id;}
     const QString& getName() const {return secret_name;}
+    const QString& getDisplayName() const {return display_name;}
     OTPCard::HashAlgorithm getMethod() const {return method;}
 };
 

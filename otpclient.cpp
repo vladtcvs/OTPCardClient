@@ -338,13 +338,14 @@ void OTPClient::listSecrets()
             break;
         case OTPCard::OperationResult::SUCCESS:
             if (used) {
+                secrets[i] = std::make_shared<TOTPSecret>(i, secret_name, secret_name, method);
+
                 auto item = new SecretListItem(this);
-                item->fillContent(secret_name, hash_method_name(method));
+                item->fillContent(secrets[i]->getDisplayName(), hash_method_name(method));
+
                 auto model_item = new QStandardItem();
                 model_item->setSizeHint(QSize(0, 48));
                 secretsModel->appendRow(model_item);
-                TOTPSecret *secret = new TOTPSecret(i, secret_name, method);
-                secrets[i] = std::shared_ptr<TOTPSecret>(secret);
 
                 connect(item, &SecretListItem::secretEditClicked, this, [this]() {
 

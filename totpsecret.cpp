@@ -3,20 +3,22 @@
 #include <QDebug>
 #include <QDateTime>
 
-TOTPSecret::TOTPSecret(int id, const QString& secret_name, OTPCard::HashAlgorithm method)
+TOTPSecret::TOTPSecret(int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method)
 {
     this->id = id;
     this->secret_name = secret_name;
+    this->display_name = display_name;
     this->method = method;
     this->digits = 6;
     this->secondsPeriod = 30;
     this->timeShift = 0;
 }
 
-TOTPSecret::TOTPSecret(int id, const QString& secret_name, OTPCard::HashAlgorithm method, int digits, int secondsPeriod, int timeShift)
+TOTPSecret::TOTPSecret(int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method, int digits, int secondsPeriod, int timeShift)
 {
     this->id = id;
     this->secret_name = secret_name;
+    this->display_name = display_name;
     this->method = method;
     this->digits = digits;
     this->secondsPeriod = secondsPeriod;
