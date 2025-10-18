@@ -116,6 +116,7 @@ std::tuple<OTPCard::OperationResult, bool, QByteArray, OTPCard::HashAlgorithm> O
     HashAlgorithm method;
     switch (response[2+name_len])
     {
+    case HashAlgorithm::NONE:
     case HashAlgorithm::SHA1:
     case HashAlgorithm::SHA256:
     case HashAlgorithm::SHA512:

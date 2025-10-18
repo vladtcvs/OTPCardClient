@@ -17,7 +17,8 @@ SOURCES += \
     nfcget.cpp \
     otpcard.cpp \
     otpclient.cpp \
-    secret_list_item.cpp
+    secret_list_item.cpp \
+    totpsecret.cpp
 
 HEADERS += \
     errordialog.h \
@@ -26,7 +27,8 @@ HEADERS += \
     nfcget.h \
     otpcard.h \
     otpclient.h \
-    secret_list_item.h
+    secret_list_item.h \
+    totpsecret.h
 
 FORMS += \
     errordialog.ui \

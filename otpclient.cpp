@@ -2,6 +2,7 @@
 #include "ui_otpclient.h"
 
 #include "secret_list_item.h"
+#include <ctype.h>
 
 #include <iso7816_pcsc.h>
 
@@ -69,16 +70,93 @@ OTPClient::OTPClient(QWidget *parent)
         }
     });
 
+    connect(ui->newSecret, &QPushButton::clicked, this, [this]() {
+        ui->pages->setCurrentIndex(5);
+        ui->update->setEnabled(false);
+    });
+
+    connect(ui->cancelAdd, &QPushButton::clicked, this, [this]() {
+        ui->pages->setCurrentIndex(0);
+        ui->update->setEnabled(true);
+        ui->newSecretName->setText("");
+        ui->newSecretValue->setText("");
+    });
+
+    connect(ui->confirmAdd, &QPushButton::clicked, this, [this]() {
+        if (!pinValid)
+            return;
+
+        auto res = card->Auth(PIN.toLatin1());
+        switch (res) {
+        case OTPCard::OperationResult::INVALID_DATA:
+            return;
+        case OTPCard::OperationResult::NO_CONNECTION:
+            return;
+        case OTPCard::OperationResult::INVALID_PIN:
+            pinValid = false;
+            return;
+        default:
+            break;
+        }
+
+        if (!pinValid)
+            return;
+        int new_secret_id = findEmptySlot();
+        if (new_secret_id != -1) {
+            QString secretName = ui->newSecretName->text();
+            QString secretB32 = ui->newSecretValue->text();
+            QByteArray secret =  fromBase32(secretB32);
+            OTPCard::HashAlgorithm method = OTPCard::HashAlgorithm::SHA1;
+            card->setSecret(new_secret_id, secretName.toLatin1(), secret, method);
+        }
+
+        ui->pages->setCurrentIndex(0);
+        ui->update->setEnabled(true);
+        ui->newSecretName->setText("");
+        ui->newSecretValue->setText("");
+        listSecrets();
+    });
+
     ui->menuButton->setStyleSheet("QToolButton::menu-indicator { image: none; }");
     ui->menuButton->setMenu(mainMenu);
 
     nfc = std::make_shared<ISO7816_PCSC>();
     card = std::make_shared<OTPCard>(nfc);
+
+    listSecrets();
 }
 
 OTPClient::~OTPClient()
 {
     delete ui;
+}
+
+QByteArray OTPClient::fromBase32(const QString& b32)
+{
+    QByteArray input = b32.toLatin1();
+    QByteArray output;
+    unsigned int acc = 0;
+    size_t bits = 0;
+    for (char c : input) {
+        unsigned v;
+        if (c == '=')
+            break;
+        else if (c >= 'A' && c <= 'Z')
+            v = c - 'A';
+        else if (c >= '2' && c <= '7')
+            v = 26 + (c - '2');
+        else
+            break;
+
+        acc = (acc << 5) | v;
+        bits += 5;
+        if (bits >= 8) {
+            unsigned char data = (acc >> (bits - 8)) & 0xFFU;
+            bits -= 8;
+            output.append(data);
+        }
+    }
+    return output;
 }
 
 void OTPClient::noCardInfo()
@@ -136,20 +214,57 @@ QString OTPClient::hash_method_name(OTPCard::HashAlgorithm method)
     }
 }
 
+int OTPClient::findEmptySlot()
+{
+    if (!pinValid) {
+        return -1;
+    }
+
+    auto res = card->Auth(PIN.toLatin1());
+    switch (res) {
+    case OTPCard::OperationResult::INVALID_DATA:
+        return -1;
+    case OTPCard::OperationResult::NO_CONNECTION:
+        return -1;
+    case OTPCard::OperationResult::INVALID_PIN:
+        pinValid = false;
+        return -1;
+    default:
+        break;
+    }
+
+    size_t maxSecrets = card->getMaxSecrets();
+    for (size_t i = 0; i < maxSecrets; i++) {
+        if (!pinValid) {
+            break;
+        }
+        qDebug() << "Querying secret #" << i;
+        auto [status, used, secret_name, method] = card->getSecretInfo(i);
+        switch (status) {
+        case OTPCard::OperationResult::INVALID_DATA:
+            return -1;
+        case OTPCard::OperationResult::NO_CONNECTION:
+            return -1;
+        case OTPCard::OperationResult::INVALID_PIN:
+            pinValid = false;
+            return -1;
+        default:
+            break;
+        }
+        if (used == false)
+            return i;
+    }
+    return -1;
+}
+
 void OTPClient::fillOTP(int id)
 {
+    std::shared_ptr<TOTPSecret> secret = secrets[id];
     if (pinValid) {
-        QDateTime asd(QDateTime::currentDateTime());
-        unsigned long unixTime = asd.toSecsSinceEpoch();
-        unsigned long challenge = unixTime / 30U;
-
-        // Big Endian
-        unsigned char challengeBytes[8];
-        for (int i = 0; i < 8; i++)
-            challengeBytes[i] = (challenge >> (64-8-i*8)) & 0xFFU;
-
-        auto challengeArray = QByteArray(reinterpret_cast<const char*>(challengeBytes), sizeof(challengeBytes));
-        qDebug() << "challenge: " << challengeArray.toHex(' ');
+        QPair<QByteArray, int> res = secret->generateChallenge();
+        QByteArray challenge = res.first;
+        int timeout = res.second;
+        qDebug() << "challenge: " << challenge.toHex(' ');
         switch (card->Auth(PIN.toLatin1())) {
         case OTPCard::OperationResult::INVALID_PIN:
             pinValid = false;
@@ -160,7 +275,7 @@ void OTPClient::fillOTP(int id)
             return;
         }
 
-        auto [result, hmac] = card->calculateHMAC(id, challengeArray);
+        auto [result, hmac] = card->calculateHMAC(secret->getId(), challenge);
         switch (result) {
             case OTPCard::OperationResult::INVALID_PIN:
                 pinValid = false;
@@ -171,26 +286,9 @@ void OTPClient::fillOTP(int id)
                 break;
             case OTPCard::OperationResult::SUCCESS:
                 {
-                    // Big Endian
-                    size_t len = hmac.length();
-                    unsigned offset = hmac[len-1] & 0x0FU;
-                    unsigned long result = (((unsigned long)(unsigned char)hmac[offset]) << 24 |
-                                            ((unsigned long)(unsigned char)hmac[offset+1]) << 16 |
-                                            ((unsigned long)(unsigned char)hmac[offset+2]) << 8 |
-                                            ((unsigned long)(unsigned char)hmac[offset+3])) & 0x7FFFFFFFUL;
-                    qDebug() << "Result = " << result << QString("%1").arg(result, 8, 16);
-                    int digits[6] = {
-                        (int)((result / 100000) % 10),
-                        (int)((result / 10000) % 10),
-                        (int)((result / 1000) % 10),
-                        (int)((result / 100) % 10),
-                        (int)((result / 10) % 10),
-                        (int)(result % 10),
-                    };
-                    QString TOTP1 = QString("%1%2%3").arg(digits[0]).arg(digits[1]).arg(digits[2]);
-                    QString TOTP2 = QString("%1%2%3").arg(digits[3]).arg(digits[4]).arg(digits[5]);
-                    ui->OTP1->setText(TOTP1);
-                    ui->OTP2->setText(TOTP2);
+                    QString TOTP = secret->TOTP(hmac);
+                    ui->OTP_VAL->setText(TOTP);
+                    ui->OTP_timeout->setText(QString("%1 sec").arg(timeout));
                 }
                 break;
         }
@@ -217,13 +315,16 @@ void OTPClient::listSecrets()
     }
 
     size_t maxSecrets = card->getMaxSecrets();
+    qDebug() << "Amount of secrets: " << maxSecrets;
     secretsModel->clear();
+    secrets.clear();
     for (size_t i = 0; i < maxSecrets; i++) {
         if (!pinValid) {
             break;
         }
         qDebug() << "Querying secret #" << i;
         auto [status, used, secret_name, method] = card->getSecretInfo(i);
+        qDebug() << "Status = " << status;
         switch (status) {
         case OTPCard::OperationResult::INVALID_DATA:
             error = true;
@@ -242,6 +343,8 @@ void OTPClient::listSecrets()
                 auto model_item = new QStandardItem();
                 model_item->setSizeHint(QSize(0, 48));
                 secretsModel->appendRow(model_item);
+                TOTPSecret *secret = new TOTPSecret(i, secret_name, method);
+                secrets[i] = std::shared_ptr<TOTPSecret>(secret);
 
                 connect(item, &SecretListItem::secretEditClicked, this, [this]() {
 
@@ -252,6 +355,7 @@ void OTPClient::listSecrets()
                         {
                             case OTPCard::OperationResult::SUCCESS:
                                 card->deleteSecret(i);
+                                listSecrets();
                                 break;
                             case OTPCard::OperationResult::INVALID_PIN:
                                 pinValid = false;
@@ -272,6 +376,7 @@ void OTPClient::listSecrets()
         }
 
         if (!pinValid || error) {
+            qDebug() << "Error";
             break;
         }
     }

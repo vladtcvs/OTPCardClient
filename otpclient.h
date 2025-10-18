@@ -5,8 +5,13 @@
 #include <QTimer>
 #include <QStandardItemModel>
 #include <QDateTime>
+
+#include <map>
+#include <memory>
+
 #include <otpcard.h>
 #include <infc.h>
+#include <totpsecret.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -26,6 +31,7 @@ private:
     Ui::OTPClient *ui;
 
     QStandardItemModel *secretsModel;
+    std::map<int, std::shared_ptr<TOTPSecret>> secrets;
 
     std::shared_ptr<INFC> nfc;
     std::shared_ptr<OTPCard> card;
@@ -37,9 +43,12 @@ private:
 private:
     QString hash_method_name(OTPCard::HashAlgorithm method);
 
+    QByteArray fromBase32(const QString& b32);
+
     void noCardInfo();
     void fillCardInfo();
     void listSecrets();
+    int findEmptySlot();
 
     void fillOTP(int id);
 

@@ -132,7 +132,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QLabel" name="label_21">
+             <widget class="QLabel" name="OTP_timeout">
               <property name="font">
                <font>
                 <pointsize>15</pointsize>
@@ -152,29 +152,17 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QLabel" name="OTP1">
+               <widget class="QLabel" name="OTP_VAL">
                 <property name="font">
                  <font>
                   <pointsize>20</pointsize>
                  </font>
                 </property>
                 <property name="text">
-                 <string>000</string>
+                 <string>000000</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="OTP2">
-                <property name="font">
-                 <font>
-                  <pointsize>20</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>000</string>
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -547,7 +535,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_2"/>
+                   <widget class="QLineEdit" name="newSecretName"/>
                   </item>
                   <item>
                    <widget class="QLabel" name="label_24">
@@ -570,7 +558,7 @@
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLineEdit" name="lineEdit"/>
+                     <widget class="QLineEdit" name="newSecretValue"/>
                     </item>
                     <item>
                      <widget class="QToolButton" name="toolButton">
@@ -614,14 +602,14 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QPushButton" name="pushButton_9">
+             <widget class="QPushButton" name="cancelAdd">
               <property name="text">
                <string>Cancel</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_8">
+             <widget class="QPushButton" name="confirmAdd">
               <property name="text">
                <string>Confirm</string>
               </property>
