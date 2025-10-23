@@ -6,12 +6,12 @@
 #include <QStandardItemModel>
 #include <QDateTime>
 
-#include <map>
 #include <memory>
 
 #include <otpcard.h>
 #include <infc.h>
 #include <totpsecret.h>
+#include <totpsecretsmanager.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,10 +31,10 @@ private:
     Ui::OTPClient *ui;
 
     QStandardItemModel *secretsModel;
-    std::map<int, std::shared_ptr<TOTPSecret>> secrets;
 
     std::shared_ptr<INFC> nfc;
     std::shared_ptr<OTPCard> card;
+    std::shared_ptr<TOTPSecretsManager> secretsManager;
     QString PIN;
     bool pinValid;
     int pinExpireSeconds;
@@ -50,7 +50,7 @@ private:
     void listSecrets();
     int findEmptySlot();
 
-    void fillOTP(int id);
+    void fillOTP(const QString& serial, int id);
 
     bool pinExpired();
     void requestPIN();

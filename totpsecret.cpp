@@ -3,8 +3,9 @@
 #include <QDebug>
 #include <QDateTime>
 
-TOTPSecret::TOTPSecret(int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method)
+TOTPSecret::TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method)
 {
+    this->card_serial = card_serial;
     this->id = id;
     this->secret_name = secret_name;
     this->display_name = display_name;
@@ -14,8 +15,9 @@ TOTPSecret::TOTPSecret(int id, const QString& display_name, const QString& secre
     this->timeShift = 0;
 }
 
-TOTPSecret::TOTPSecret(int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method, int digits, int secondsPeriod, int timeShift)
+TOTPSecret::TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method, int digits, int secondsPeriod, int timeShift)
 {
+    this->card_serial = card_serial;
     this->id = id;
     this->secret_name = secret_name;
     this->display_name = display_name;
@@ -59,4 +61,24 @@ QString TOTPSecret::TOTP(QByteArray HMAC) const
     }
     std::reverse(digits.begin(), digits.end());
     return digits;
+}
+
+void TOTPSecret::update_display_name(const QString& display_name)
+{
+    this->display_name = display_name;
+}
+
+void TOTPSecret::update_digits(int digits)
+{
+    this->digits = digits;
+}
+
+void TOTPSecret::update_period(int period)
+{
+    this->secondsPeriod = period;
+}
+
+void TOTPSecret::update_timeShift(int timeShift)
+{
+    this->timeShift = timeShift;
 }

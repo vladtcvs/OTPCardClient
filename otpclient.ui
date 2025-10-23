@@ -85,7 +85,7 @@
       <item>
        <widget class="QStackedWidget" name="pages">
         <property name="currentIndex">
-         <number>1</number>
+         <number>6</number>
         </property>
         <widget class="QWidget" name="main">
          <layout class="QGridLayout" name="gridLayout_2">

@@ -18,7 +18,8 @@ SOURCES += \
     otpcard.cpp \
     otpclient.cpp \
     secret_list_item.cpp \
-    totpsecret.cpp
+    totpsecret.cpp \
+    totpsecretsmanager.cpp
 
 HEADERS += \
     errordialog.h \
@@ -28,7 +29,8 @@ HEADERS += \
     otpcard.h \
     otpclient.h \
     secret_list_item.h \
-    totpsecret.h
+    totpsecret.h \
+    totpsecretsmanager.h
 
 FORMS += \
     errordialog.ui \
