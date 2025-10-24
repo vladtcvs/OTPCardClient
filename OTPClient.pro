@@ -20,6 +20,8 @@ SOURCES += \
     pinmanager.cpp \
     secret_edit.cpp \
     secret_list_item.cpp \
+    secret_new.cpp \
+    secrets_list.cpp \
     show_totp.cpp \
     totpsecret.cpp \
     totpsecretsmanager.cpp
@@ -34,6 +36,8 @@ HEADERS += \
     pinmanager.h \
     secret_edit.h \
     secret_list_item.h \
+    secret_new.h \
+    secrets_list.h \
     show_totp.h \
     totpsecret.h \
     totpsecretsmanager.h
@@ -44,6 +48,8 @@ FORMS += \
     pinenter.ui \
     secret_edit.ui \
     secret_list_item.ui \
+    secret_new.ui \
+    secrets_list.ui \
     show_totp.ui
 
 # Default rules for deployment.
