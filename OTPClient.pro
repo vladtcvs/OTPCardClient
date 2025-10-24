@@ -11,6 +11,7 @@ INCLUDEPATH += /usr/include/PCSC
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    card_params.cpp \
     errordialog.cpp \
     iso7816_pcsc.cpp \
     main.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
     totpsecretsmanager.cpp
 
 HEADERS += \
+    card_params.h \
     errordialog.h \
     infc.h \
     iso7816_pcsc.h \
@@ -43,6 +45,7 @@ HEADERS += \
     totpsecretsmanager.h
 
 FORMS += \
+    card_params.ui \
     errordialog.ui \
     otpclient.ui \
     pinenter.ui \

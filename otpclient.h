@@ -16,6 +16,7 @@
 #include <show_totp.h>
 #include <secret_new.h>
 #include <secrets_list.h>
+#include <card_params.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,6 +39,7 @@ private:
     ShowTOTP *showTOTPWidget;
     SecretsList *secretsListWidget;
     SecretNew *secretNewWidget;
+    CardParams *cardParamsWidget;
 
     std::shared_ptr<PinManager> pin;
     std::shared_ptr<INFC> nfc;
@@ -49,8 +51,8 @@ private:
     QString current_serial;
 
     const int settings_widget_id = 0;
-    const int card_info_widget_id = 1;
-    const int about_widget_id = 2;
+    const int about_widget_id = 1;
+    int card_info_widget_id;
     int secret_new_widget_id;
     int secrets_list_widget_id;
     int totp_widget_id;

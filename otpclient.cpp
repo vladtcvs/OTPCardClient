@@ -114,6 +114,11 @@ OTPClient::OTPClient(QWidget *parent)
         secretsListWidget->listSecrets();
     });
 
+    // Card parameters
+    cardParamsWidget = new CardParams(card, this);
+    card_info_widget_id = ui->pages->addWidget(cardParamsWidget);
+
+    // Menu actions
     connect(home, &QAction::triggered, this, [this]() {
         ui->pages->setCurrentIndex(secrets_list_widget_id);
         ui->update->setEnabled(true);
@@ -125,9 +130,9 @@ OTPClient::OTPClient(QWidget *parent)
     });
 
     connect(otpCardInfo, &QAction::triggered, this, [this]() {
+        cardParamsWidget->fillCardInfo();
         ui->pages->setCurrentIndex(card_info_widget_id);
         ui->update->setEnabled(true);
-        fillCardInfo();
     });
 
     connect(about, &QAction::triggered, this, [this]() {
@@ -144,7 +149,7 @@ OTPClient::OTPClient(QWidget *parent)
         } else if (index == totp_widget_id) {
             showTOTPWidget->generateTOTP(serial, current_id);
         } else if (index == card_info_widget_id) {
-            fillCardInfo();
+            cardParamsWidget->fillCardInfo();
         }
     });
 
@@ -157,53 +162,12 @@ OTPClient::OTPClient(QWidget *parent)
 
 OTPClient::~OTPClient()
 {
+    delete cardParamsWidget;
     delete secretsListWidget;
     delete secretNewWidget;
     delete showTOTPWidget;
     delete secretEditWidget;
     delete ui;
-}
-
-
-void OTPClient::noCardInfo()
-{
-    ui->maxSecretLength->setText("N/A");
-    ui->maxSecretNameLength->setText("N/A");
-    ui->maxSecrets->setText("N/A");
-    ui->serialNumber->setText("N/A");
-    ui->sha1support->setText("N/A");
-    ui->sha256support->setText("N/A");
-    ui->sha512support->setText("N/A");
-}
-
-void OTPClient::fillCardInfo()
-{
-    if (!card) {
-        noCardInfo();
-        return;
-    }
-
-    if (!card->checkConnection())
-    {
-        noCardInfo();
-        return;
-    }
-
-    QByteArray serial = card->getSerial();
-    size_t maxSecrets = card->getMaxSecrets();
-    size_t maxSecretLength = card->getMaxSecretValueLength();
-    size_t maxSecretNameLength = card->getMaxSecretNameLength();
-    bool sha1 = card->getAlgorithmSupported(OTPCard::HashAlgorithm::SHA1);
-    bool sha256 = card->getAlgorithmSupported(OTPCard::HashAlgorithm::SHA256);
-    bool sha512 = card->getAlgorithmSupported(OTPCard::HashAlgorithm::SHA512);
-
-    ui->maxSecretLength->setNum((int)maxSecretLength);
-    ui->maxSecretNameLength->setNum((int)maxSecretNameLength);
-    ui->maxSecrets->setNum((int)maxSecrets);
-    ui->serialNumber->setText(serial.toHex());
-    ui->sha1support->setText(sha1 ? "+" : "-");
-    ui->sha256support->setText(sha256 ? "+" : "-");
-    ui->sha512support->setText(sha512 ? "+" : "-");
 }
 
 bool OTPClient::pinExpired()
