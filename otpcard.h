@@ -7,6 +7,7 @@
 #include <QByteArray>
 
 #include <infc.h>
+#include <pinmanager.h>
 
 class OTPCard
 {
@@ -37,10 +38,11 @@ public:
         NO_CONNECTION,
         INVALID_DATA,
         INVALID_PIN,
+        NO_AUTHORIZED,
     };
 
 public:
-    OTPCard(std::shared_ptr<INFC> nfc);
+    OTPCard(std::shared_ptr<INFC> nfc, std::shared_ptr<PinManager> pin);
 public:
     bool checkConnection();
     QByteArray getSerial();
@@ -49,18 +51,19 @@ public:
     size_t getMaxSecretNameLength();
     bool getAlgorithmSupported(HashAlgorithm algo);
 
-    OperationResult Auth(QByteArray pin);
+    OperationResult Auth();
 
     std::tuple<OperationResult, bool, QByteArray, HashAlgorithm> getSecretInfo(int id);
-    OperationResult setSecret(int id, QByteArray name, QByteArray secret, HashAlgorithm method);
-    std::tuple<OperationResult, QByteArray> calculateHMAC(int id, QByteArray challenge);
+    OperationResult setSecret(int id, const QByteArray& name, const QByteArray& secret, HashAlgorithm method);
+    std::tuple<OperationResult, QByteArray> calculateHMAC(int id, const QByteArray& challenge);
     OperationResult deleteSecret(int id);
 
-    OperationResult setPin(QByteArray newPin);
-    OperationResult setAdminPin(QByteArray adminPin, QByteArray newAdminPin);
-    OperationResult unlockPin(QByteArray adminPin);
+    OperationResult setPin(const QByteArray& newPin);
+    OperationResult setAdminPin(const QByteArray& adminPin, const QByteArray& newAdminPin);
+    OperationResult unlockPin(const QByteArray& adminPin, const QByteArray& newPin);
 private:
     std::shared_ptr<INFC> nfc;
+    std::shared_ptr<PinManager> pin;
 };
 
 #endif // OTPCARD_H

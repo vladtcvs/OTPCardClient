@@ -13,6 +13,9 @@
 #include <totpsecret.h>
 #include <totpsecretsmanager.h>
 
+#include <secret_edit.h>
+#include <show_totp.h>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class OTPClient;
@@ -32,14 +35,25 @@ private:
 
     QStandardItemModel *secretsModel;
 
+    SecretEdit *secretEditWidget;
+    ShowTOTP *showTOTPWidget;
+
+    std::shared_ptr<PinManager> pin;
     std::shared_ptr<INFC> nfc;
     std::shared_ptr<OTPCard> card;
     std::shared_ptr<TOTPSecretsManager> secretsManager;
-    QString PIN;
-    bool pinValid;
     int pinExpireSeconds;
     QDateTime pinEnterTime;
     int current_id;
+    QString current_serial;
+
+    const int secrets_list_widget_id = 0;
+    const int settings_widget_id = 1;
+    const int card_info_widget_id = 2;
+    const int about_widget_id = 3;
+    const int new_secret_widget_id = 4;
+    int totp_widget_id;
+    int secret_edit_widget_id;
 private:
     QString hash_method_name(OTPCard::HashAlgorithm method);
 
@@ -51,6 +65,7 @@ private:
     int findEmptySlot();
 
     void fillOTP(const QString& serial, int id);
+    void editSecret(const QString& serial, int id);
 
     bool pinExpired();
     void requestPIN();

@@ -17,7 +17,10 @@ SOURCES += \
     nfcget.cpp \
     otpcard.cpp \
     otpclient.cpp \
+    pinmanager.cpp \
+    secret_edit.cpp \
     secret_list_item.cpp \
+    show_totp.cpp \
     totpsecret.cpp \
     totpsecretsmanager.cpp
 
@@ -28,7 +31,10 @@ HEADERS += \
     nfcget.h \
     otpcard.h \
     otpclient.h \
+    pinmanager.h \
+    secret_edit.h \
     secret_list_item.h \
+    show_totp.h \
     totpsecret.h \
     totpsecretsmanager.h
 
@@ -36,7 +42,9 @@ FORMS += \
     errordialog.ui \
     otpclient.ui \
     pinenter.ui \
-    secret_list_item.ui
+    secret_edit.ui \
+    secret_list_item.ui \
+    show_totp.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

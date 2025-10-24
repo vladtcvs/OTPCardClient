@@ -31,6 +31,9 @@ public:
     const QString& getName() const {return secret_name;}
     const QString& getDisplayName() const {return display_name;}
     const QString& getCardSerial() const {return card_serial;}
+    int getDigits() const {return digits;}
+    int getTimeShift() const {return timeShift;}
+    int getSecondsPeriod() const {return secondsPeriod;}
     OTPCard::HashAlgorithm getMethod() const {return method;}
 };
 
