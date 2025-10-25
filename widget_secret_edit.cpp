@@ -1,5 +1,5 @@
-#include "secret_edit.h"
-#include "ui_secret_edit.h"
+#include "widget_secret_edit.h"
+#include "ui_widget_secret_edit.h"
 
 SecretEdit::SecretEdit(std::shared_ptr<TOTPSecretsManager> secretsManager, QWidget *parent)
     : QWidget(parent)

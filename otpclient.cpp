@@ -45,7 +45,8 @@ OTPClient::OTPClient(QWidget *parent)
         case OTPCard::OperationResult::SUCCESS:
             card->deleteSecret(id);
             secretsManager->deleteSecret(serial, id);
-            secretsListWidget->listSecrets();
+            populateSecretsManager(serial);
+            secretsListWidget->listSecrets(serial);
             break;
         default:
             break;
@@ -67,19 +68,38 @@ OTPClient::OTPClient(QWidget *parent)
         ui->update->setEnabled(true);
         ui->pages->setCurrentIndex(secrets_list_widget_id);
     });
-    connect(secretNewWidget, &SecretNew::addNewSecret, this, [this](const QString& serial, int id, const QString& name, const QString& display_name,
+    connect(secretNewWidget, &SecretNew::addNewSecret, this, [this](const QString& name, const QString& display_name, const QByteArray& secret,
                                                                     OTPCard::HashAlgorithm method, int digits, int time_shift, int period) {
-        (void)id;
-        (void)serial;
-        (void)name;
-        (void)display_name;
-        (void)method;
-        (void)digits;
-        (void)time_shift;
-        (void)period;
+        auto res = card->Auth();
+        switch (res) {
+        case OTPCard::OperationResult::INVALID_DATA:
+        case OTPCard::OperationResult::NO_CONNECTION:
+        case OTPCard::OperationResult::INVALID_PIN:
+            return;
+        default:
+            break;
+        }
+
+        int new_secret_id = findEmptySlot();
+        if (new_secret_id != -1) {
+            auto serial = card->getSerial();
+            card->setSecret(new_secret_id, name.toUtf8(), secret, method);
+            std::shared_ptr<TOTPSecret> new_secret = std::make_shared<TOTPSecret>(serial,
+                                                                                  new_secret_id,
+                                                                                  display_name,
+                                                                                  name,
+                                                                                  method,
+                                                                                  digits,
+                                                                                  period,
+                                                                                  time_shift);
+            secretsManager->addSecret(new_secret);
+        }
+
         ui->update->setEnabled(true);
         ui->pages->setCurrentIndex(secrets_list_widget_id);
-        secretsListWidget->listSecrets();
+        auto serial = card->getSerial();
+        populateSecretsManager(serial);
+        secretsListWidget->listSecrets(serial);
     });
 
     // show TOTP
@@ -97,7 +117,8 @@ OTPClient::OTPClient(QWidget *parent)
         secretsManager->deleteSecret(serial, id);
         ui->pages->setCurrentIndex(secrets_list_widget_id);
         ui->update->setEnabled(true);
-        secretsListWidget->listSecrets();
+        populateSecretsManager(serial);
+        secretsListWidget->listSecrets(serial);
     });
 
     connect(secretEditWidget, &SecretEdit::saveClicked, this, [this](const QString& serial, int id,
@@ -111,18 +132,31 @@ OTPClient::OTPClient(QWidget *parent)
         }
         ui->pages->setCurrentIndex(secrets_list_widget_id);
         ui->update->setEnabled(true);
-        secretsListWidget->listSecrets();
+        populateSecretsManager(serial);
+        secretsListWidget->listSecrets(serial);
     });
 
     // Card parameters
     cardParamsWidget = new CardParams(card, this);
     card_info_widget_id = ui->pages->addWidget(cardParamsWidget);
+    connect(cardParamsWidget, &CardParams::change_pin, this, [this](){
+
+    });
+    connect(cardParamsWidget, &CardParams::change_admin_pin, this, [this](){
+
+    });
+    connect(cardParamsWidget, &CardParams::unlock_pin, this, [this](){
+
+    });
+    connect(cardParamsWidget, &CardParams::reset_card, this, [this](){
+
+    });
 
     // Menu actions
     connect(home, &QAction::triggered, this, [this]() {
         ui->pages->setCurrentIndex(secrets_list_widget_id);
         ui->update->setEnabled(true);
-        secretsListWidget->listSecrets();
+        secretsListWidget->listSecrets(card->getSerial());
     });
 
     connect(settings, &QAction::triggered, this, [this]() {
@@ -145,7 +179,7 @@ OTPClient::OTPClient(QWidget *parent)
         auto serial = card->getSerial();
         int index = ui->pages->currentIndex();
         if (index == secrets_list_widget_id) {
-            secretsListWidget->listSecrets();
+            secretsListWidget->listSecrets(card->getSerial());
         } else if (index == totp_widget_id) {
             showTOTPWidget->generateTOTP(serial, current_id);
         } else if (index == card_info_widget_id) {
@@ -157,8 +191,83 @@ OTPClient::OTPClient(QWidget *parent)
     ui->menuButton->setMenu(mainMenu);
 
     ui->pages->setCurrentIndex(secrets_list_widget_id);
-    secretsListWidget->listSecrets();
+    auto serial = card->getSerial();
+    populateSecretsManager(serial);
+    secretsListWidget->listSecrets(serial);
 }
+
+void OTPClient::populateSecretsManager(const QString& serial)
+{
+    auto res = card->Auth();
+    switch (res) {
+    case OTPCard::OperationResult::SUCCESS:
+        break;
+    default:
+        return;
+    }
+
+    size_t max_secrets = card->getMaxSecrets();
+    QList<int> used_ids;
+    for (size_t i = 0; i < max_secrets; i++) {
+        auto [res, used, name, method] = card->getSecretInfo(i);
+        switch (res) {
+        case OTPCard::OperationResult::SUCCESS:
+            break;
+        default:
+            return;
+        }
+
+        if (!used)
+            continue;
+
+        used_ids.append(i);
+        auto secret = secretsManager->getSecret(serial, i);
+        if (secret == nullptr) {
+            // New secret on card - create new
+            secret = std::make_shared<TOTPSecret>(serial, i, name, name, method, 6, 30, 0);
+            secretsManager->addSecret(secret);
+        } else if (secret->getName() != name || secret->getMethod() != method) {
+            // Method on card doesn't match local storage - remove old and create new
+            secretsManager->deleteSecret(serial, i);
+            secret = std::make_shared<TOTPSecret>(serial, i, name, name, method, 6, 30, 0);
+            secretsManager->addSecret(secret);
+        }
+    }
+
+    // Remove secrets which not present on card
+    for (auto secret : secretsManager->getSecretsForCard(serial)) {
+        int id = secret->getId();
+        if (!used_ids.contains(id))
+            secretsManager->deleteSecret(serial, id);
+    }
+}
+
+int OTPClient::findEmptySlot()
+{
+    auto res = card->Auth();
+    switch (res) {
+    case OTPCard::OperationResult::SUCCESS:
+        break;
+    default:
+        return -1;
+    }
+
+    size_t maxSecrets = card->getMaxSecrets();
+    for (size_t i = 0; i < maxSecrets; i++) {
+        qDebug() << "Querying secret #" << i;
+        auto [status, used, secret_name, method] = card->getSecretInfo(i);
+        switch (status) {
+        case OTPCard::OperationResult::SUCCESS:
+            break;
+        default:
+            return -1;
+        }
+        if (used == false)
+            return i;
+    }
+    return -1;
+}
+
 
 OTPClient::~OTPClient()
 {

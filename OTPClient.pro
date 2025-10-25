@@ -11,7 +11,6 @@ INCLUDEPATH += /usr/include/PCSC
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    card_params.cpp \
     errordialog.cpp \
     iso7816_pcsc.cpp \
     main.cpp \
@@ -19,16 +18,16 @@ SOURCES += \
     otpcard.cpp \
     otpclient.cpp \
     pinmanager.cpp \
-    secret_edit.cpp \
-    secret_list_item.cpp \
-    secret_new.cpp \
-    secrets_list.cpp \
-    show_totp.cpp \
     totpsecret.cpp \
-    totpsecretsmanager.cpp
+    totpsecretsmanager.cpp \
+    widget_card_params.cpp \
+    widget_secret_edit.cpp \
+    widget_secret_list_item.cpp \
+    widget_secret_new.cpp \
+    widget_secrets_list.cpp \
+    widget_show_totp.cpp
 
 HEADERS += \
-    card_params.h \
     errordialog.h \
     infc.h \
     iso7816_pcsc.h \
@@ -36,24 +35,25 @@ HEADERS += \
     otpcard.h \
     otpclient.h \
     pinmanager.h \
-    secret_edit.h \
-    secret_list_item.h \
-    secret_new.h \
-    secrets_list.h \
-    show_totp.h \
     totpsecret.h \
-    totpsecretsmanager.h
+    totpsecretsmanager.h \
+    widget_card_params.h \
+    widget_secret_edit.h \
+    widget_secret_list_item.h \
+    widget_secret_new.h \
+    widget_secrets_list.h \
+    widget_show_totp.h
 
 FORMS += \
-    card_params.ui \
     errordialog.ui \
     otpclient.ui \
     pinenter.ui \
-    secret_edit.ui \
-    secret_list_item.ui \
-    secret_new.ui \
-    secrets_list.ui \
-    show_totp.ui
+    widget_card_params.ui \
+    widget_secret_edit.ui \
+    widget_secret_list_item.ui \
+    widget_secret_new.ui \
+    widget_secrets_list.ui \
+    widget_show_totp.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

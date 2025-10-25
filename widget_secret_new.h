@@ -1,5 +1,5 @@
-#ifndef SECRET_NEW_H
-#define SECRET_NEW_H
+#ifndef WIDGET_SECRET_NEW_H
+#define WIDGET_SECRET_NEW_H
 
 #include <QWidget>
 
@@ -23,7 +23,6 @@ public:
     ~SecretNew();
 private:
     QByteArray fromBase32(const QString& b32);
-    int findEmptySlot();
 private:
     Ui::SecretNew *ui;
     std::shared_ptr<TOTPSecretsManager> secretsManager;
@@ -31,8 +30,8 @@ private:
     std::shared_ptr<OTPCard> card;
 signals:
     void cancelClicked();
-    void addNewSecret(const QString& serial, int id, const QString& name, const QString& display_name,
+    void addNewSecret(const QString& name, const QString& display_name, const QByteArray& secret,
                       OTPCard::HashAlgorithm method, int digits, int time_shift, int period);
 };
 
-#endif // SECRET_NEW_H
+#endif // WIDGET_SECRET_NEW_H

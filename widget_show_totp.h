@@ -1,5 +1,5 @@
-#ifndef SHOW_TOTP_H
-#define SHOW_TOTP_H
+#ifndef WIDGET_SHOW_TOTP_H
+#define WIDGET_SHOW_TOTP_H
 
 #include <QWidget>
 
@@ -34,4 +34,4 @@ signals:
     void editClicked(const QString& serial, int id);
 };
 
-#endif // SHOW_TOTP_H
+#endif // WIDGET_SHOW_TOTP_H

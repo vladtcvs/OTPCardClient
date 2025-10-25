@@ -1,5 +1,5 @@
-#include "secret_list_item.h"
-#include "ui_secret_list_item.h"
+#include "widget_secret_list_item.h"
+#include "ui_widget_secret_list_item.h"
 
 SecretListItem::SecretListItem(QWidget *parent)
     : QWidget{parent},

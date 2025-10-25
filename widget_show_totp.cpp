@@ -1,5 +1,5 @@
-#include "show_totp.h"
-#include "ui_show_totp.h"
+#include "widget_show_totp.h"
+#include "ui_widget_show_totp.h"
 
 ShowTOTP::ShowTOTP(std::shared_ptr<TOTPSecretsManager> secretsManager,
                    std::shared_ptr<PinManager> pinManager,
@@ -59,6 +59,7 @@ void ShowTOTP::generateTOTP(const QString& serial, int id)
         QString TOTP = secret->TOTP(hmac);
         ui->OTP_VAL->setText(TOTP);
         ui->OTP_timeout->setText(QString("%1 sec").arg(timeout));
+        ui->secret_name->setText(secret->getDisplayName());
         break;
     }
     default:

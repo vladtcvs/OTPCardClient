@@ -1,5 +1,5 @@
-#ifndef SECRETS_LIST_H
-#define SECRETS_LIST_H
+#ifndef WIDGET_SECRETS_LIST_H
+#define WIDGET_SECRETS_LIST_H
 
 #include <QWidget>
 #include <totpsecretsmanager.h>
@@ -21,7 +21,7 @@ public:
                          QWidget *parent = nullptr);
     ~SecretsList();
 
-    void listSecrets();
+    void listSecrets(const QString& serial);
 private:
     QString hash_method_name(OTPCard::HashAlgorithm method);
 private:
@@ -37,4 +37,4 @@ signals:
     void generateTOTPClicked(const QString& serial, int id);
 };
 
-#endif // SECRETS_LIST_H
+#endif // WIDGET_SECRETS_LIST_H

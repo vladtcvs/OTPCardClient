@@ -33,6 +33,21 @@
       </spacer>
      </item>
      <item>
+      <widget class="QLabel" name="secret_name">
+       <property name="font">
+        <font>
+         <pointsize>20</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Secret Name</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="OTP_timeout">
        <property name="font">
         <font>

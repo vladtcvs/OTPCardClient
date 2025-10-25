@@ -1,5 +1,5 @@
-#ifndef CARD_PARAMS_H
-#define CARD_PARAMS_H
+#ifndef WIDGET_CARD_PARAMS_H
+#define WIDGET_CARD_PARAMS_H
 
 #include <QWidget>
 
@@ -29,4 +29,4 @@ signals:
     void reset_card();
 };
 
-#endif // CARD_PARAMS_H
+#endif // WIDGET_CARD_PARAMS_H

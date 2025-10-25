@@ -12,11 +12,11 @@
 #include <totpsecret.h>
 #include <totpsecretsmanager.h>
 
-#include <secret_edit.h>
-#include <show_totp.h>
-#include <secret_new.h>
-#include <secrets_list.h>
-#include <card_params.h>
+#include <widget_secret_edit.h>
+#include <widget_show_totp.h>
+#include <widget_secret_new.h>
+#include <widget_secrets_list.h>
+#include <widget_card_params.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -58,8 +58,10 @@ private:
     int totp_widget_id;
     int secret_edit_widget_id;
 private:
+    int findEmptySlot();
     void noCardInfo();
     void fillCardInfo();
+    void populateSecretsManager(const QString& serial);
 
     void fillOTP(const QString& serial, int id);
     void editSecret(const QString& serial, int id);

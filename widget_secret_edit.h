@@ -1,5 +1,5 @@
-#ifndef SECRET_EDIT_H
-#define SECRET_EDIT_H
+#ifndef WIDGET_SECRET_EDIT_H
+#define WIDGET_SECRET_EDIT_H
 
 #include <QWidget>
 
@@ -32,4 +32,4 @@ signals:
     void deleteClicked(const QString& serial, int id);
 };
 
-#endif // SECRET_EDIT_H
+#endif // WIDGET_SECRET_EDIT_H

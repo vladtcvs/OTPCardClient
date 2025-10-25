@@ -1,5 +1,5 @@
-#ifndef SECRET_LIST_ITEM_H
-#define SECRET_LIST_ITEM_H
+#ifndef WIDGET_SECRET_LIST_ITEM_H
+#define WIDGET_SECRET_LIST_ITEM_H
 
 #include <QWidget>
 
@@ -26,4 +26,4 @@ signals:
     void secretSelected();
 };
 
-#endif // SECRET_LIST_ITEM_H
+#endif // WIDGET_SECRET_LIST_ITEM_H

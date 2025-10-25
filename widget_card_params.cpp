@@ -1,5 +1,5 @@
-#include "card_params.h"
-#include "ui_card_params.h"
+#include "widget_card_params.h"
+#include "ui_widget_card_params.h"
 
 CardParams::CardParams(std::shared_ptr<OTPCard> card, QWidget *parent)
     : QWidget(parent)
