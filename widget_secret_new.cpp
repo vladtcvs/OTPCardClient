@@ -22,7 +22,7 @@ SecretNew::SecretNew(std::shared_ptr<TOTPSecretsManager> secretsManager,
         QString secretName = ui->newSecretName->text();
         QString secretB32 = ui->newSecretValue->text();
         QByteArray secret =  fromBase32(secretB32);
-        OTPCard::HashAlgorithm method = OTPCard::HashAlgorithm::SHA1;
+        HashAlgorithm method = HashAlgorithm::SHA1;
         emit addNewSecret(secretName, secretName, secret, method, 6, 0, 30);
         ui->newSecretName->setText("");
         ui->newSecretValue->setText("");

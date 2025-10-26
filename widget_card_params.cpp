@@ -51,13 +51,18 @@ void CardParams::fillCardInfo()
         return;
     }
 
-    QByteArray serial = card->getSerial();
-    size_t maxSecrets = card->getMaxSecrets();
-    size_t maxSecretLength = card->getMaxSecretValueLength();
-    size_t maxSecretNameLength = card->getMaxSecretNameLength();
-    bool sha1 = card->getAlgorithmSupported(OTPCard::HashAlgorithm::SHA1);
-    bool sha256 = card->getAlgorithmSupported(OTPCard::HashAlgorithm::SHA256);
-    bool sha512 = card->getAlgorithmSupported(OTPCard::HashAlgorithm::SHA512);
+    auto [res, info] = card->getCardInfo();
+    if (res != OTPCard::OperationResult::SUCCESS) {
+        noCardInfo();
+        return;
+    }
+    QByteArray serial = info.serial();
+    size_t maxSecrets = info.maxSecrets();
+    size_t maxSecretLength = info.maxSecretLen();
+    size_t maxSecretNameLength = info.maxSecretNameLen();
+    bool sha1 = info.getAlgorithmSupported(HashAlgorithm::SHA1);
+    bool sha256 = info.getAlgorithmSupported(HashAlgorithm::SHA256);
+    bool sha512 = info.getAlgorithmSupported(HashAlgorithm::SHA512);
 
     ui->maxSecretLength->setNum((int)maxSecretLength);
     ui->maxSecretNameLength->setNum((int)maxSecretNameLength);

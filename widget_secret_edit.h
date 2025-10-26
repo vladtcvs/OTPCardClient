@@ -21,7 +21,7 @@ public:
     ~SecretEdit();
     void editSecret(const QString& serial, int id);
 private:
-    QString hash_method_name(OTPCard::HashAlgorithm method);
+    QString hash_method_name(HashAlgorithm method);
 private:
     Ui::SecretEdit *ui;
     std::shared_ptr<TOTPSecretsManager> secretsManager;

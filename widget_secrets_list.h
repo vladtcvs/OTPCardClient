@@ -23,7 +23,7 @@ public:
 
     void listSecrets(const QString& serial);
 private:
-    QString hash_method_name(OTPCard::HashAlgorithm method);
+    QString hash_method_name(HashAlgorithm method);
 private:
     Ui::SecretsList *ui;
     std::shared_ptr<TOTPSecretsManager> secretsManager;

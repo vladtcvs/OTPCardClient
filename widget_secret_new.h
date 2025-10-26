@@ -31,7 +31,7 @@ private:
 signals:
     void cancelClicked();
     void addNewSecret(const QString& name, const QString& display_name, const QByteArray& secret,
-                      OTPCard::HashAlgorithm method, int digits, int time_shift, int period);
+                      HashAlgorithm method, int digits, int time_shift, int period);
 };
 
 #endif // WIDGET_SECRET_NEW_H

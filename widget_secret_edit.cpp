@@ -32,14 +32,14 @@ SecretEdit::~SecretEdit()
     delete ui;
 }
 
-QString SecretEdit::hash_method_name(OTPCard::HashAlgorithm method)
+QString SecretEdit::hash_method_name(HashAlgorithm method)
 {
     switch (method) {
-    case OTPCard::HashAlgorithm::SHA1:
+    case HashAlgorithm::SHA1:
         return "SHA1";
-    case OTPCard::HashAlgorithm::SHA256:
+    case HashAlgorithm::SHA256:
         return "SHA-256";
-    case OTPCard::HashAlgorithm::SHA512:
+    case HashAlgorithm::SHA512:
         return "SHA-512";
     default:
         return "N/A";

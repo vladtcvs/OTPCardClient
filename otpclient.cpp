@@ -69,8 +69,11 @@ OTPClient::OTPClient(QWidget *parent)
         ui->pages->setCurrentIndex(secrets_list_widget_id);
     });
     connect(secretNewWidget, &SecretNew::addNewSecret, this, [this](const QString& name, const QString& display_name, const QByteArray& secret,
-                                                                    OTPCard::HashAlgorithm method, int digits, int time_shift, int period) {
-        auto res = card->Auth();
+                                                                    HashAlgorithm method, int digits, int time_shift, int period) {
+        auto [res, info] = card->getCardInfo();
+        auto serial = info.serial();
+
+        res = card->Auth();
         switch (res) {
         case OTPCard::OperationResult::INVALID_DATA:
         case OTPCard::OperationResult::NO_CONNECTION:
@@ -82,7 +85,6 @@ OTPClient::OTPClient(QWidget *parent)
 
         int new_secret_id = findEmptySlot();
         if (new_secret_id != -1) {
-            auto serial = card->getSerial();
             card->setSecret(new_secret_id, name.toUtf8(), secret, method);
             std::shared_ptr<TOTPSecret> new_secret = std::make_shared<TOTPSecret>(serial,
                                                                                   new_secret_id,
@@ -97,7 +99,7 @@ OTPClient::OTPClient(QWidget *parent)
 
         ui->update->setEnabled(true);
         ui->pages->setCurrentIndex(secrets_list_widget_id);
-        auto serial = card->getSerial();
+
         populateSecretsManager(serial);
         secretsListWidget->listSecrets(serial);
     });
@@ -154,9 +156,12 @@ OTPClient::OTPClient(QWidget *parent)
 
     // Menu actions
     connect(home, &QAction::triggered, this, [this]() {
+        auto [res, info] = card->getCardInfo();
+        auto serial = info.serial();
+
         ui->pages->setCurrentIndex(secrets_list_widget_id);
         ui->update->setEnabled(true);
-        secretsListWidget->listSecrets(card->getSerial());
+        secretsListWidget->listSecrets(serial);
     });
 
     connect(settings, &QAction::triggered, this, [this]() {
@@ -176,10 +181,12 @@ OTPClient::OTPClient(QWidget *parent)
     connect(ui->update, &QToolButton::clicked, this, [this]() {
         if (card == nullptr)
             return;
-        auto serial = card->getSerial();
+        auto [res, info] = card->getCardInfo();
+        auto serial = info.serial();
+
         int index = ui->pages->currentIndex();
         if (index == secrets_list_widget_id) {
-            secretsListWidget->listSecrets(card->getSerial());
+            secretsListWidget->listSecrets(serial);
         } else if (index == totp_widget_id) {
             showTOTPWidget->generateTOTP(serial, current_id);
         } else if (index == card_info_widget_id) {
@@ -191,14 +198,18 @@ OTPClient::OTPClient(QWidget *parent)
     ui->menuButton->setMenu(mainMenu);
 
     ui->pages->setCurrentIndex(secrets_list_widget_id);
-    auto serial = card->getSerial();
+    auto [res, info] = card->getCardInfo();
+    auto serial = info.serial();
+
     populateSecretsManager(serial);
     secretsListWidget->listSecrets(serial);
 }
 
 void OTPClient::populateSecretsManager(const QString& serial)
 {
-    auto res = card->Auth();
+    auto [res, info] = card->getCardInfo();
+
+    res = card->Auth();
     switch (res) {
     case OTPCard::OperationResult::SUCCESS:
         break;
@@ -206,7 +217,7 @@ void OTPClient::populateSecretsManager(const QString& serial)
         return;
     }
 
-    size_t max_secrets = card->getMaxSecrets();
+    size_t max_secrets = info.maxSecrets();
     QList<int> used_ids;
     for (size_t i = 0; i < max_secrets; i++) {
         auto [res, used, name, method] = card->getSecretInfo(i);
@@ -244,7 +255,9 @@ void OTPClient::populateSecretsManager(const QString& serial)
 
 int OTPClient::findEmptySlot()
 {
-    auto res = card->Auth();
+    auto [res, info] = card->getCardInfo();
+
+    res = card->Auth();
     switch (res) {
     case OTPCard::OperationResult::SUCCESS:
         break;
@@ -252,7 +265,7 @@ int OTPClient::findEmptySlot()
         return -1;
     }
 
-    size_t maxSecrets = card->getMaxSecrets();
+    size_t maxSecrets = info.maxSecrets();
     for (size_t i = 0; i < maxSecrets; i++) {
         qDebug() << "Querying secret #" << i;
         auto [status, used, secret_name, method] = card->getSecretInfo(i);

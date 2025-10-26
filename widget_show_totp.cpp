@@ -26,6 +26,7 @@ void ShowTOTP::generateTOTP(const QString& serial, int id)
 {
     current_serial = serial;
     current_id = id;
+
     std::shared_ptr<TOTPSecret> secret = secretsManager->getSecret(serial, id);
     if (secret == nullptr)
     {

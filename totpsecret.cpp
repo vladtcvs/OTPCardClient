@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QDateTime>
 
-TOTPSecret::TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method)
+TOTPSecret::TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, HashAlgorithm method)
 {
     this->card_serial = card_serial;
     this->id = id;
@@ -15,7 +15,7 @@ TOTPSecret::TOTPSecret(const QString& card_serial, int id, const QString& displa
     this->timeShift = 0;
 }
 
-TOTPSecret::TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method, int digits, int secondsPeriod, int timeShift)
+TOTPSecret::TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, HashAlgorithm method, int digits, int secondsPeriod, int timeShift)
 {
     this->card_serial = card_serial;
     this->id = id;

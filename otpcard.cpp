@@ -13,61 +13,27 @@ bool OTPCard::checkConnection()
     return nfcget.isConnected();
 }
 
-QByteArray OTPCard::getSerial()
+std::tuple<OTPCard::OperationResult, CardInfo> OTPCard::getCardInfo() const
 {
     NFCGet nfcget(nfc);
     if (!nfcget.isConnected())
-        return QByteArray();
+        return std::make_tuple(OTPCard::OperationResult::NO_CONNECTION, CardInfo());
     nfc->selectOTPCard();
     auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::GET_INFO, 0, 0, 0, {});
+    if (sw1 != 0x90 || sw2 != 0x00)
+        return std::make_tuple(OTPCard::OperationResult::INVALID_DATA, CardInfo());
+    size_t max_secrets = response[0];
+    size_t max_secret_name_len = response[1];
+    size_t max_secret_value_len = response[2];
+    bool sha1 = response[3];
+    bool sha256 = response[4];
+    bool sha512 = response[5];
     QByteArray serial = response.slice(6, 4);
-    return serial;
-}
-
-size_t OTPCard::getMaxSecrets()
-{
-    NFCGet nfcget(nfc);
-    if (!nfcget.isConnected())
-        return 0;
-    nfc->selectOTPCard();
-    auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::GET_INFO, 0, 0, 0, {});
-    return response[0];
-}
-
-size_t OTPCard::getMaxSecretValueLength()
-{
-    NFCGet nfcget(nfc);
-    if (!nfcget.isConnected())
-        return 0;
-    auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::GET_INFO, 0, 0, 0, {});
-    return response[2];
-}
-
-size_t OTPCard::getMaxSecretNameLength()
-{
-    NFCGet nfcget(nfc);
-    if (!nfcget.isConnected())
-        return 0;
-    auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::GET_INFO, 0, 0, 0, {});
-    return response[1];
-}
-
-bool OTPCard::getAlgorithmSupported(OTPCard::HashAlgorithm algo)
-{
-    NFCGet nfcget(nfc);
-    if (!nfcget.isConnected())
-        return false;
-    auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::GET_INFO, 0, 0, 0, {});
-    switch (algo) {
-    case OTPCard::HashAlgorithm::SHA1:
-        return response[3];
-    case OTPCard::HashAlgorithm::SHA256:
-        return response[4];
-    case OTPCard::HashAlgorithm::SHA512:
-        return response[5];
-    default:
-        return false;
-    }
+    return std::make_tuple(OTPCard::OperationResult::SUCCESS, CardInfo(serial,
+                                                                       max_secrets,
+                                                                       max_secret_name_len,
+                                                                       max_secret_value_len,
+                                                                       sha1, sha256, sha512));
 }
 
 OTPCard::OperationResult OTPCard::Auth()
@@ -83,7 +49,7 @@ OTPCard::OperationResult OTPCard::Auth()
     apdu.append(pin->pin().length());
     for (char c : pin->pin())
         apdu.append(c);
-    auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::PIN, 0, 0, 0, apdu);
+    auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::AUTH, 0, 0, 0, apdu);
     if (sw1 == 0x69 && sw2 == 0x82) {
         this->pin->invalid();
         return OTPCard::OperationResult::INVALID_PIN;
@@ -95,7 +61,7 @@ OTPCard::OperationResult OTPCard::Auth()
     return OTPCard::OperationResult::SUCCESS;
 }
 
-std::tuple<OTPCard::OperationResult, bool, QByteArray, OTPCard::HashAlgorithm> OTPCard::getSecretInfo(int id)
+std::tuple<OTPCard::OperationResult, bool, QByteArray, HashAlgorithm> OTPCard::getSecretInfo(int id)
 {
     NFCGet nfcget(nfc);
     if (!nfcget.isConnected())
@@ -135,7 +101,7 @@ std::tuple<OTPCard::OperationResult, bool, QByteArray, OTPCard::HashAlgorithm> O
     return std::make_tuple(OTPCard::OperationResult::SUCCESS, used, name, method);
 }
 
-OTPCard::OperationResult OTPCard::setSecret(int id, const QByteArray& name, const QByteArray& secret, OTPCard::HashAlgorithm method)
+OTPCard::OperationResult OTPCard::setSecret(int id, const QByteArray& name, const QByteArray& secret, HashAlgorithm method)
 {
     NFCGet nfcget(nfc);
     if (!nfcget.isConnected())
@@ -222,7 +188,7 @@ OTPCard::OperationResult OTPCard::setAdminPin(const QByteArray& adminPin, const 
     apdu.append(newAdminPin.length());
     for (char c : newAdminPin)
         apdu.append(c);
-    auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::SAVE_ADMIN_PIN, 0, 0, 0, apdu);
+    auto [sw1, sw2, response] = nfc->sendAPDU(0x00, Command::SAVE_PIN, 0, 1, 0, apdu);
     if (sw1 == 0x69 && sw2 == 0x82)
         return OTPCard::OperationResult::INVALID_PIN;
     if (sw1 != 0x90 || sw2 != 0x00)

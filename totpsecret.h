@@ -17,10 +17,10 @@ private:
     QString secret_name;
     QString display_name;
     QString card_serial;
-    OTPCard::HashAlgorithm method;
+    HashAlgorithm method;
 public:
-    TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method);
-    TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, OTPCard::HashAlgorithm method, int digits, int secondsPeriod, int timeShift);
+    TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, HashAlgorithm method);
+    TOTPSecret(const QString& card_serial, int id, const QString& display_name, const QString& secret_name, HashAlgorithm method, int digits, int secondsPeriod, int timeShift);
     void update_display_name(const QString& display_name);
     void update_digits(int digits);
     void update_period(int period);
@@ -34,7 +34,7 @@ public:
     int getDigits() const {return digits;}
     int getTimeShift() const {return timeShift;}
     int getSecondsPeriod() const {return secondsPeriod;}
-    OTPCard::HashAlgorithm getMethod() const {return method;}
+    HashAlgorithm getMethod() const {return method;}
 };
 
 #endif // TOTPSECRET_H

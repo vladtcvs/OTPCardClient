@@ -11,6 +11,7 @@ INCLUDEPATH += /usr/include/PCSC
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    cardinfo.cpp \
     errordialog.cpp \
     iso7816_pcsc.cpp \
     main.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
     widget_show_totp.cpp
 
 HEADERS += \
+    cardinfo.h \
     errordialog.h \
     infc.h \
     iso7816_pcsc.h \
