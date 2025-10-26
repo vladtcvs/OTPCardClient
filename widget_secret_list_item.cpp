@@ -15,10 +15,11 @@ SecretListItem::SecretListItem(QWidget *parent)
     });
 }
 
-void SecretListItem::fillContent(const QString& name, const QString& method)
+void SecretListItem::fillContent(const QString& name, const QString& display_name, const QString& method)
 {
     (void)method; // unused
     ui->secret_name->setText(name);
+    ui->secret_display_name->setText(display_name);
 }
 
 void SecretListItem::mousePressEvent(QMouseEvent *event)

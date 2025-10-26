@@ -49,7 +49,7 @@ void SecretsList::listSecrets(const QString& serial)
     for (auto secret : secretsManager->getSecretsForCard(serial)) {
         qDebug() << "Querying secret #" << secret->getId();
         auto item = new SecretListItem(this);
-        item->fillContent(secret->getDisplayName(), hash_method_name(secret->getMethod()));
+        item->fillContent(secret->getName(), secret->getDisplayName(), hash_method_name(secret->getMethod()));
 
         auto model_item = new QStandardItem();
         model_item->setSizeHint(QSize(0, 48));

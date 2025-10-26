@@ -14,7 +14,7 @@ class SecretListItem : public QWidget
     Q_OBJECT
 public:
     explicit SecretListItem(QWidget *parent = nullptr);
-    void fillContent(const QString& name, const QString& method);
+    void fillContent(const QString& name, const QString& display_name, const QString& method);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
